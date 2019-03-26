@@ -2,15 +2,9 @@
 # Recipes: Health Broth = 0, Magi Soup = 1, Strength Syrup = 2, Caramel Conversions = 3, Cake of Attack Bonus = 4
 # The facts that the board is 5x5, recipes are length 5, and at most 5 recipes can be done are hardcoded all other the code.
 
-# TODO:
-# add support for breaking of the walls around the map (endiswal)
 # Limitations:
-# Half-Dragon can move the plants around cause he does magic damage, and the plants are magic immune. So he can move a plant once
-# (if you knock a plant into a wall, it is destroyed right away, and the wall too). This is limited to 1 move per plant.
-# The same can be done if you have knockback + consecrated strike from GG. (not sure if in this case you are limited to just 1 strike though).
-# * you could also weytwut+pisorf the vampire 1/2 times. His HP is 6.
-# you can also try to position the vampire with WONAFYT.
-# Note that half-dragon with ENDISWAL can move plants quite a bit more than normal.
+# * Half-dragon/consecrated strike plant moves are not supported
+# * No glyph support for now (no ENDISWAL, PISORF, WEYTWUT, WONAFYT)
 
 # Honestly, I only use Numpy for [i, j] syntax. I could torch it anytime.
 import numpy as np
@@ -345,11 +339,11 @@ def theo_is_a_theo_solution(x, board_totals):
         return True
 
 def theo_list_optimal_theo_solutions_no_buf(board_totals):
-# Returns the list of all possible solutions, assuming that all
-# plants are reachable. Strictly dominated solutions are not returned.
+# Returns the list of all possible theo solutions, assuming that all plants are reachable.
 
         # First find the max for each recipe, then do brute-force loop.
         # For higher # of coordinates recursively computing the max of the remaining ones is, ofc, optimal and faster.
+        # I could optimize this function later if needed
         s = [];
         theo_max_for_each_recipe = [0] * 5
 
@@ -406,9 +400,6 @@ def theo_list_optimal_theo_solutions(puzzle):
 #         2) check that we have enough plants to complete the recipe
 #         3) after that call theo_list_optimal_theo_solutions_no_buf on the remaining total and add 1 recipe.
 #         4) join the solutions from step 3 and from theo_list_optimal_theo_solutions_no_buf(board_totals) and remove the dominated ones
-        #print("Entering theo_list_optimal_theo_solutions")
-        #print("board_totals: ", board_totals, ", buf: ", buf)
-        #print("solutions_achieved: ", solutions_achieved)
 
         solutions = theo_list_optimal_theo_solutions_no_buf(puzzle.board_totals)
         if puzzle.buf[0]:
@@ -434,6 +425,7 @@ def theo_list_optimal_theo_solutions(puzzle):
         return solutions
 
 def theo_update_theo_solutions_remaining(theo_solutions_remaining, solutions_achieved):
+# Removes theo_solutions that are dominated by real solutions already achieved
         for s in solutions_achieved:
                 for t in theo_solutions_remaining.copy():
                         if theo_is_dominated_by(t, s.recipes_achieved):
@@ -441,7 +433,7 @@ def theo_update_theo_solutions_remaining(theo_solutions_remaining, solutions_ach
 
 
 def theo_complete_this_recipe_solution(puzzle, solution_so_far, recipe_num):
-# if buf is not empty, then it has to be the beginning of recipe_num.
+# if puzzle.buf is not empty, then it has to be the beginning of recipe_num.
 # adds the moves that produce recipe_num to solution_so_far
 # puzzle, solutions_so_far are all modified!
         for i in range(5): # loop over the recipe
@@ -487,13 +479,9 @@ def theo_find_filler_moves(puzzle, solution_so_far, recipe_list):
 
 def theo_find_moves_for_this_theo_solution(puzzle, recipe_list):
 # Here recipe_list is a 5x1 array
-# The function returns the sequence of moves attaining the recipe_list
+# The function returns a Solution attaining the recipe_list
 # the solution must be reachable
-# recipe_list is modified inside!
-        #print("Entering theo_find_moves_for_this_theo_solution")
-        #print_puzzle_state(board, buf)
-        #print("totals: ", board_totals, "recipe_list: ", recipe_list)
-
+        recipe_list = recipe_list.copy()
         solution_so_far = Solution()
 
         # first, deal with the buffer
@@ -521,13 +509,7 @@ def theo_find_moves_for_this_theo_solution(puzzle, recipe_list):
         return solution_so_far.moves
 
 def theo_solve_puzzle(puzzle, solution_so_far, solutions_achieved):
-# This returns a list of solutions
-        # This is the list of all reachable solutions from here
-        #print("Entering theo_solve_puzzle")
-        #print_puzzle_state(board, buf)
-        #print("board totals: ", board_totals)
-        #print("solution so far: ", solution_so_far)
-        #print("solutions_achieved: ", solutions_achieved)
+# This returns a Solution_Set
         theo_solutions = theo_list_optimal_theo_solutions(puzzle)
         #print("theo_solutions:", theo_solutions)
         if not theo_solutions: # cannot extend the current solution
@@ -553,15 +535,13 @@ def theo_solve_puzzle(puzzle, solution_so_far, solutions_achieved):
         return solutions
 
 def solve_puzzle(puzzle):
-# board must be a 5x5 np.array of ints.
 # buf (buffer) must be a 5x1 array of ints
 # The function will return a set of reachable solutions.
 # Dominated solutions (strictly worse than some other solution) are not returned.
-# a solution is a dict with the following fields:
-# sol['recipes'] is the list of recipes achieved, 5x1. boons[i] = N means we got N of recipe (i+1).
-# sol['moves'] is a list of moves that achieve this result. Each move is a pair of ints.
-        #print_game_state(board, buf)
         solutions = Solution_Set()
+        if not isinstance(puzzle, Puzzle):
+                print("puzzle should be an instance of the Puzzle class")
+                return solutions
         if not puzzle.verify_initial_state_correctedness():
                 print("Incorrect puzzle")
                 return solutions
@@ -580,7 +560,6 @@ def solve_puzzle_iteratively(puzzle, solution_so_far, solutions_achieved, theo_s
 # First version. No hashing. Just a few heuristics
         #print("")
         #print("Entering solve_puzzle_iteratively")
-        #print_puzzle_state(board, buf)
         #print("solution so far:", solution_so_far)
         #print("solutions:",  solutions_achieved)
         #print("remaining to be found: ", theo_solutions_remaining)
@@ -614,7 +593,6 @@ def solve_puzzle_iteratively(puzzle, solution_so_far, solutions_achieved, theo_s
                 m_solution_so_far = solution_so_far.copy()
                 #print("making move ", move)
                 m_puzzle.make_move(move, m_solution_so_far, solutions_achieved)
-                #print_puzzle_state(m_board, m_buf)
                 #print("solution so far:", m_solution_so_far)
                 solve_puzzle_iteratively(m_puzzle, m_solution_so_far, solutions_achieved, theo_solutions_remaining)
                 theo_update_theo_solutions_remaining(theo_solutions_remaining, solutions_achieved)
