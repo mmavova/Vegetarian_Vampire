@@ -1,6 +1,6 @@
 # Vegetarian Vampire
 
-This project implements a solver for the [Vegetarian Vampire](http://www.qcfdesign.com/wiki/DesktopDungeons/index.php?title=Vegetarian_Vampire) puzzle sub from the game [Desktop Dungeons](http://www.desktopdungeons.net)
+This project implements a solver for the [Vegetarian Vampire](http://www.qcfdesign.com/wiki/DesktopDungeons/index.php?title=Vegetarian_Vampire) puzzle sub from the game [Desktop Dungeons](http://www.desktopdungeons.net).
 
 ## Getting Started
 
@@ -26,7 +26,9 @@ Python3 and numpy.
 I have implemented some tests for the code. They can be run as follows:
 
 python3 test_Puzzle.py -v
+
 python3 test_Solution_and_Set.py -v
+
 python3 test_veg_vampire.py -v
 
 ## License
