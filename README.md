@@ -13,7 +13,7 @@ Currently only regular plant cutting in melee is supported. The following moves 
 - transmutation seal
 
 The following moves/situations are possible or might be possible, but are also not supported:
-- you can also break a wall behind the vampire (transmutation seal, but no ENDDISWAL),
+- you can also break a wall behind the vampire (transmutation seal, but no ENDISWAL),
   and then move him via knockback and finally break more walls this way.
 - Maybe you destroyed some walls, and then converted ENDISWAL. 
 - patches the teddy technically could teleport you god knows where (kill the vampire or use Yendor/Cracked Amulet), but it is probably unimportant.

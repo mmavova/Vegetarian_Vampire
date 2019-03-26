@@ -301,11 +301,16 @@ class Solution:
                 obj = Solution(self.recipes_achieved, self.moves)
                 return obj
 
-        def trim_solution(self):
+        def trim_solution(self, puzzle):
         # This function removes chaff at the end of the solution
-                # that does not actually achieve any recipes
-                # FIXME: implement
-                pass
+        # that does not actually achieve any recipes.
+                puzzle = puzzle.copy()
+                ssf = Solution() # solution_so_far
+                for i in range(len(self.moves)):
+                        puzzle.make_move(self.moves[i], ssf)
+                        if self.recipes_achieved == ssf.recipes_achieved:
+                                break
+                del self.moves[i + 1:]
 
         
 # End of Solution class
@@ -456,7 +461,7 @@ def theo_list_optimal_theo_solutions(puzzle):
 #         1) check if buf begins any recipe,
 #         2) check that we have enough plants to complete the recipe
 #         3) after that call theo_list_optimal_theo_solutions_no_buf on the remaining total and add 1 recipe.
-#         4) join the solutions from step 3 and from theo_list_optimal_theo_solutions_no_buf(board_totals) and remove the dominated ones
+#         4) join the solutions from step 3 and from theo_list_optimal_theo_solutions_no_buf(board_totals)
 
         solutions = theo_list_optimal_theo_solutions_no_buf(puzzle.board_totals)
         if puzzle.buf[0]:
@@ -510,7 +515,7 @@ def theo_complete_this_recipe_solution(puzzle, solution_so_far, recipe_num):
 '''
 If current buffer cannot be completed to a full recipe, we fill it up with useless plants
 But we need to be careful to make sure these plants are useless
-recipes is a 5x1 array of the recipes we plan to achieve with the remainder of the board.
+recipe_list is a 5x1 array of the recipe totals we plan to achieve with the remainder of the board.
 '''
 def theo_find_filler_moves(puzzle, solution_so_far, recipe_list):
         # First compute the unused plants assuming we completed all recipes
@@ -608,7 +613,8 @@ def solve_puzzle(puzzle):
         #print("final solutions: ", solutions.solutions)
         for s in solutions.solutions:
                 puzzle.verify_solution(s)
-                s.trim_solution()
+                s.trim_solution(puzzle)
+
         solutions.sort_by_total()
         return solutions
 
