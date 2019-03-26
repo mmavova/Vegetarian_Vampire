@@ -20,17 +20,18 @@ board = np.array([[2, 3, 4, 1, 1],
 
 
 
-# board = np.array([[1, 1, 5, 0, 0],
-#                   [5, 1, 0, 0, 0],
-#                   [0, 0, 0, 0, 0],
-#                   [0, 0, 0, 0, 0],
-#                   [0, 0, 0, 0, 0]])
-solutions = vv.solve_puzzle(vv.Puzzle(board, [0] * 5))
+board = np.array([[1, 2, 2, 2, 2],
+                  [1, 2, 2, 2, 2],
+                  [1, 2, 2, 2, 2],
+                  [5, 2, 2, 2, 2],
+                  [5, 2, 2, 2, 2]])
+attributes = {'have_ENDISWAL': True}
+solutions = vv.solve_puzzle(vv.Puzzle(board, [0] * 5, attributes))
 print(solutions)
-quit()
+
 
 for i in range(50):
-    p = vv.Puzzle(np.random.randint(1, 6, size=[5, 5], dtype=int))
+    p = vv.Puzzle(np.random.randint(1, 6, size=[5, 5], dtype=int), [0] * 5, attributes)
     p.print_puzzle_state()
     solutions = vv.solve_puzzle(p)
     for s in solutions:
@@ -105,9 +106,9 @@ quit()
 
 #solutions = vv.theo_solve_puzzle(board, vv.compute_board_totals(board), buf, vv.empty_solution(), [])
 
-solutions = vv.solve_puzzle(board, buf)
-print(solutions)
-quit()
+#solutions = vv.solve_puzzle(board, buf)
+#print(solutions)
+#quit()
 #solutions = vv.theo_list_all_optimal_solutions([3, 0, 0, 0, 2], [0] * 5, [])
 
 

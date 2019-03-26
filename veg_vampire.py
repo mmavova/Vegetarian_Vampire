@@ -41,24 +41,26 @@ g_recipes_totals = precompute_recipes_totals()
 
 
 class Puzzle:
-        def __init__(self, board, buf = []):
+        def __init__(self, board, buf = [0] * 5, attributes = dict()):
                 self.board = board.copy()
-                if buf:
-                        self.buf = buf.copy()
-                else:
-                        self.buf = [0] * 5
-
+                self.buf = buf.copy()
                 self.board_totals = [0] * 5
                 self.compute_board_totals()
-                
+                self.attributes = attributes.copy()
+                self.populate_default_attributes()
         @classmethod
         def from_puzzle(cls, puzzle):
-                return cls(puzzle.board, puzzle.buf)
+                return cls(puzzle.board, puzzle.buf, puzzle.attributes)
 
         def copy(self):
                 p = Puzzle.from_puzzle(self)
                 return p
+
+        def populate_default_attributes(self):
+                default_attributes = {'have_ENDISWAL': False}
+                self.attributes = {**default_attributes, **self.attributes}
                 
+        
         def verify_initial_state_correctedness(self):
         # Some sanity checks.
         # I do not verify that you actually could reach the plants that are missing.
@@ -103,8 +105,12 @@ class Puzzle:
         # returns true if board[i, j] is reachable
         # Assumes empty squares have been generated correctly.
         # Empty squares and the entrance ((1, 4), (2, 4), (3, 4)) are always reachable.
+                reachable_with_ENDISWAL = {(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (4, 1), (4, 2), (4, 3), (4, 4), (0, 4)}
                 if self.board[i, j] == 0 or (j == 4 and (i == 1 or i == 2 or i == 3)):
                         return True
+                if self.attributes['have_ENDISWAL'] and (i, j) in reachable_with_ENDISWAL:
+                        return True
+                        
                 s = set() # the set of all neighbours
                 for ind1 in range(max(0, i - 1), min(5, i + 2)):
                         for ind2 in range(max(0, j - 1), min(5, j + 2)):
@@ -589,6 +595,7 @@ def solve_puzzle(puzzle):
 # buf (buffer) must be a 5x1 array of ints
 # The function will return a set of reachable solutions.
 # Dominated solutions (strictly worse than some other solution) are not returned.
+# This is the main function that users should call.
         solutions = Solution_Set()
         if not isinstance(puzzle, Puzzle):
                 print("puzzle should be an instance of the Puzzle class")
@@ -597,14 +604,28 @@ def solve_puzzle(puzzle):
                 print("Incorrect puzzle")
                 return solutions
         
-        theo_solutions_remaining = theo_list_optimal_theo_solutions(puzzle)
-        #print(theo_solutions_remaining)
-        solve_puzzle_iteratively(puzzle, Solution(), solutions, theo_solutions_remaining)
+        solutions = solver_solve_puzzle(puzzle.copy())
         #print("final solutions: ", solutions.solutions)
         for s in solutions.solutions:
                 puzzle.verify_solution(s)
                 s.trim_solution()
         solutions.sort_by_total()
+        return solutions
+
+def solver_solve_puzzle(puzzle):
+        theo_solutions_remaining = theo_list_optimal_theo_solutions(puzzle)
+        solutions = Solution_Set()
+        if not puzzle.attributes['have_ENDISWAL']:
+                solve_puzzle_iteratively(puzzle, Solution(), solutions, theo_solutions_remaining)
+        else:
+                puzzle1 = puzzle.copy()
+                puzzle1.attributes['have_ENDISWAL'] = False
+                # Solve without ENDISWAL first
+                solve_puzzle_iteratively(puzzle1, Solution(), solutions, theo_solutions_remaining)
+                rem = len(theo_solutions_remaining)
+                solve_puzzle_iteratively(puzzle,  Solution(), solutions, theo_solutions_remaining)
+                if rem > len(theo_solutions_remaining):
+                        print("Found ", rem - len(theo_solutions_remaining), " solutions with ENDISWAL")
         return solutions
 
 def solve_puzzle_iteratively(puzzle, solution_so_far, solutions_achieved, theo_solutions_remaining):
