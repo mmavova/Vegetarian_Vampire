@@ -20,7 +20,7 @@ g_recipes = np.array([[1, 1, 5, 1, 5], # BR - BR - SV - BR - SV
                       [3, 2, 2, 3, 4]]) # HB - CP - CP - HB - RS
 
 # These are the weights of moves used in sort_the_moves
-# higher value means a more desireable move
+# higher value means a more desirable move
 g_board_move_weights = [[0, 0, 0, 0, 0],
                         [0, 1, 0, 1, 0],
                         [0, 0, 2, 0, 1],
