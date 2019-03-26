@@ -24,11 +24,13 @@ Python3 and numpy.
 ## Running the tests
 
 I have implemented some tests for the code. They can be run as follows:
-'''
+
+```
 python3 test_Puzzle.py -v
 python3 test_Solution_and_Set.py -v
 python3 test_veg_vampire.py -v
-'''
+```
+
 ## License
 [GNU Affero General Public License](https://www.gnu.org/licenses/agpl.html)
 
