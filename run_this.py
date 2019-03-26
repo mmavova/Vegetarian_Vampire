@@ -6,11 +6,11 @@ import numpy as np
 # difficult example to analyze later:
 # big set of solutions
 # buf = [0] * 5
-# board = np.array([[2, 3, 4, 1, 1],
-#                   [4, 5, 3, 2, 3],
-#                   [2, 4, 3, 3, 5],
-#                   [4, 1, 4, 3, 4],
-#                   [3, 1, 3, 5, 5]])
+board = np.array([[2, 3, 4, 1, 1],
+                  [4, 5, 3, 2, 3],
+                  [2, 4, 3, 3, 5],
+                  [4, 1, 4, 3, 4],
+                  [3, 1, 3, 5, 5]])
 
 #recipes = np.array([[1, 1, 5, 1, 5], # BR - BR - SV - BR - SV
 #                    [2, 2, 2, 3, 5], # CP - CP - CP - HB - SV
@@ -20,13 +20,14 @@ import numpy as np
 
 
 
-board = np.array([[1, 1, 5, 0, 0],
-                  [5, 1, 0, 0, 0],
-                  [0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0]])
+# board = np.array([[1, 1, 5, 0, 0],
+#                   [5, 1, 0, 0, 0],
+#                   [0, 0, 0, 0, 0],
+#                   [0, 0, 0, 0, 0],
+#                   [0, 0, 0, 0, 0]])
 solutions = vv.solve_puzzle(vv.Puzzle(board, [0] * 5))
 print(solutions)
+quit()
 
 for i in range(50):
     p = vv.Puzzle(np.random.randint(1, 6, size=[5, 5], dtype=int))

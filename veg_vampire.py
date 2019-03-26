@@ -231,6 +231,11 @@ class Puzzle:
                         raise Exception("Nope, the moves you gave me do not achieve the solution claimed")
 
 # End of Puzzle class                
+g_recipe_names = ['Health Broth', 'Magi Soup', 'Strength Syrup', 'Caramel Conversion', 'Cake of Attack Bonus']
+g_recipe_names_plural = ['Health Broths', 'Magi Soups', 'Strength Syrups', 'Caramel Conversions', 'Cake of Attack Bonuses']
+
+def move_to_str(move):
+        return "cut plant at (%s, %s)" % (move[0] + 1, move[1] + 1)
 
 class Solution:
         def __init__(self, recipes_achieved = [], moves = []):
@@ -240,6 +245,42 @@ class Solution:
                         self.recipes_achieved = [0] * 5
                 self.moves = moves.copy()
 
+        def __repr__(self):
+                return "<Solution: recipes_achieved:%s moves:%s>" % (self.recipes_achieved, self.moves)
+                
+        def __str__(self):
+                res = ""
+                if self.recipes_achieved:
+                        res += "Recipes achieved: "
+                        if sum(self.recipes_achieved):
+                                for i in range(5):
+                                        if self.recipes_achieved[i]:
+                                                res = res + str(self.recipes_achieved[i]) + " "
+                                                if self.recipes_achieved[i] > 1:
+                                                        res += g_recipe_names_plural[i]
+                                                else:
+                                                        res += g_recipe_names[i]
+                                                if sum([self.recipes_achieved[j] for j in range(i + 1, 5)]):
+                                                        res += ", "
+                                                else:
+                                                        res += ". "
+                                                        break
+                        else: 
+                                res += "Achieved Nothing. "
+                res += "Moves:\n"
+                if self.moves:
+                        for i in range(len(self.moves)):
+                                res += move_to_str(self.moves[i])
+                                if i < len(self.moves) - 1:
+                                        res += ", "
+                                else:
+                                        res += ". "
+                                
+                else:
+                        res += "none. "
+                return res
+
+                        
         def __lt__(self, other):
         # I am not considering length/complexity of moves yet
                 return sum(self.recipes_achieved) < sum(other.recipes_achieved)
@@ -270,6 +311,16 @@ class Solution_Set:
 
         def __getitem__(self, key):
                 return self.solutions[key]
+        
+        def __str__(self):
+                if not self.solutions:
+                        return "Solution set is empty. "
+                res = "%s different optimal solutions." % len(self.solutions)
+                for s in self.solutions:
+                        res = res + "\n" + s.__str__()
+                return res
+                
+
                 
         def exclude_dominated_solutions(self, solutions_achieved = []):
         # Removes solutions that are not optimal
@@ -585,7 +636,7 @@ def solve_puzzle_iteratively(puzzle, solution_so_far, solutions_achieved, theo_s
 
         moves = puzzle.get_available_moves()
         #print("unsorted moves:", moves)
-        # moves that complete/extend a recipe or icrease the number of reachable squares go to the front of the line
+        # moves that complete/extend a recipe or increase the number of reachable squares go to the front of the line
         moves = sort_the_moves(puzzle, moves)
         #print("sorted moves:", moves)
         for move in moves:
